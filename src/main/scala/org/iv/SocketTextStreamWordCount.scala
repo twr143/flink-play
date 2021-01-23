@@ -82,7 +82,6 @@ object SocketTextStreamWordCount {
         def getResult(accumulator: mutable.TreeSet[(String, Int)]): List[(String, Int)] = {
 
           val r = accumulator.take(5).toList
-//          logger.info("lst = {}",r)
           r
         }
         def merge(a: mutable.TreeSet[(String, Int)], b: mutable.TreeSet[(String, Int)]): mutable.TreeSet[(String, Int)] = a ++ b
