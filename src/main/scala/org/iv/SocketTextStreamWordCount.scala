@@ -20,10 +20,9 @@ package org.iv
 
 import java.util.concurrent.TimeUnit
 
-import org.apache.flink.api.common.functions.AggregateFunction
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.windowing.time.Time
-import org.iv.WordCount.getClass
+import org.iv.aggregate.MaxNAggr
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
@@ -54,7 +53,6 @@ object SocketTextStreamWordCount {
   val logger = LoggerFactory.getLogger(getClass)
 
   def main(args: Array[String]): Unit = {
-    implicit val ord = Ordering.fromLessThan[(String, Int)]({ case (f, s) => if (f._2 != s._2) f._2 > s._2 else f._1 < s._1 })
     if (args.length != 2) {
       System.err.println("USAGE:\nSocketTextStreamWordCount <hostname> <port>")
       return
@@ -67,25 +65,11 @@ object SocketTextStreamWordCount {
 
     //Create streams for names and ages by mapping the inputs to the corresponding objects
     val text = env.socketTextStream(hostName, port)
-    val counts = text.flatMap(_.toLowerCase.split("\\W+") filter (_.nonEmpty))
-      .map {
-        (_, 1)
-      }
+    val counts = text.flatMap(_.toLowerCase.split("\\W+") filter (_.nonEmpty)).map((_, 1))
       .keyBy(_._1)
       .sum(1)
-      .timeWindowAll(Time.of(1,TimeUnit.MINUTES),Time.of(5,TimeUnit.SECONDS) )
-      .aggregate(new AggregateFunction[(String, Int), mutable.TreeSet[(String, Int)], List[(String, Int)]] {
-        def createAccumulator(): mutable.TreeSet[(String, Int)] = mutable.TreeSet.empty
-        def add(value: (String, Int), accumulator: mutable.TreeSet[(String, Int)]): mutable.TreeSet[(String, Int)] = {
-          accumulator.filter(_._1!=value._1) += value
-        }
-        def getResult(accumulator: mutable.TreeSet[(String, Int)]): List[(String, Int)] = {
-
-          val r = accumulator.take(5).toList
-          r
-        }
-        def merge(a: mutable.TreeSet[(String, Int)], b: mutable.TreeSet[(String, Int)]): mutable.TreeSet[(String, Int)] = a ++ b
-      })
+      .timeWindowAll(Time.of(1,TimeUnit.MINUTES),Time.of(3,TimeUnit.SECONDS) )
+      .aggregate(MaxNAggr())
 
 
     counts print
