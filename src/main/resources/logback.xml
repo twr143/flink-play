@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration scan="true">
+  <jmxConfigurator/>
+  <if condition='isDefined("LOG_HOST")'>
+    <then>
+      <appender name="GELF" class="de.siegmar.logbackgelf.GelfUdpAppender">
+        <graylogHost>${LOG_HOST}</graylogHost>
+        <graylogPort>${LOG_PORT}</graylogPort>
+        <maxChunkSize>508</maxChunkSize>
+        <encoder class="de.siegmar.logbackgelf.GelfEncoder">
+          <includeRawMessage>true</includeRawMessage>
+          <includeMarker>true</includeMarker>
+          <includeMdcData>true</includeMdcData>
+          <includeCallerData>true</includeCallerData>
+          <includeRootCauseData>true</includeRootCauseData>
+          <includeLevelName>true</includeLevelName>
+          <shortPatternLayout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%m%nopex</pattern>
+          </shortPatternLayout>
+          <fullPatternLayout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%m</pattern>
+          </fullPatternLayout>
+          <staticField>appName:${APP_NAME}</staticField>
+        </encoder>
+      </appender>
+      <root level="debug">
+        <appender-ref ref="GELF"/>
+      </root>
+    </then>
+  </if>
+  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+    <file>../testFile.log</file>
+    <append>true</append>
+    <!-- set immediateFlush to false for much higher logging throughput -->
+    <immediateFlush>true</immediateFlush>
+    <!-- encoders are assigned the type
+         ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} %X{cid} %logger{5} - %msg%n%rEx</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS}%boldYellow(%replace( [%X{cid}] ){' \[\] ', ' '}) %logger{5} - %msg%n%rEx</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="org.iv" level="${LOG_LEVEL:-INFO}" additivity="false">
+    <appender-ref ref="STDOUT"/>
+    <appender-ref ref="FILE"/>
+  </logger>
+
+  <root level="${LOG_LEVEL:-WARN}">
+    <appender-ref ref="STDOUT"/>
+    <appender-ref ref="FILE"/>
+  </root>
+
+</configuration>
