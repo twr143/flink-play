@@ -16,7 +16,9 @@ val flinkVersion = "1.11.3"
 val flinkDependencies = Seq(
   "org.apache.flink" %% "flink-clients" % flinkVersion,
   "org.apache.flink" %% "flink-scala" % flinkVersion,
-  "org.apache.flink" %% "flink-streaming-scala" % flinkVersion)
+  "org.apache.flink" %% "flink-streaming-scala" % flinkVersion,
+  "org.apache.flink" %% "flink-connector-kafka" % flinkVersion
+)
 val loggingDependencies = Seq(
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
   //  "ch.qos.logback" % "logback-classic" % "1.2.3",
