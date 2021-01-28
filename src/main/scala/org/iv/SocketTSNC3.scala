@@ -60,20 +60,25 @@ object SocketTSNC3 {
 
   def main(args: Array[String]): Unit = {
     val regex = "\\d+"
-    if (args.length != 2) {
-      System.err.println("USAGE:\nSocketTextStreamWordCount <hostname> <port>")
+    if (args.length != 3) {
+      System.err.println("USAGE:\nSocketTextStreamWordCount <hostname> <port> <source>")
       return
     }
 
     val hostName = args(0)
     val port = args(1).toInt
+    val source = args(2)
     val k = 10
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     env.setParallelism(2)
     env.setMaxParallelism(4)
-
-    val text = env.socketTextStream(hostName, port)
-    val counts = text.flatMap(_.toLowerCase.split("\\W+") filter (w => w.nonEmpty && w.matches(regex))).map(_.toInt).map((_, 1))
+    val counts = (if (source == "socket")
+      env.socketTextStream(hostName, port).flatMap(_.toLowerCase.split("\\W+")
+        filter (w => w.nonEmpty && w.matches(regex))).map(_.toInt) else
+      env.fromCollection(List.iterate(0, 100)(a => (a + 1) % 11))
+        .map(a=>{TimeUnit.MILLISECONDS.sleep(100);a})
+      )
+      .map((_, 1))
       .keyBy(_._1)
       .sum(1)
       .timeWindowAll(Time.of(1, TimeUnit.MINUTES), Time.of(3, TimeUnit.SECONDS))
