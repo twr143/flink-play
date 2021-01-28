@@ -19,9 +19,8 @@ final case class MaxComposedAggr(k: Int) extends AggregateFunction[(Int, Int), A
   def add(value: (Int, Int), acc: ACC): ACC = {
     if (acc._1.contains(k - value._1)) {
       (acc._1 - (k - value._1), acc._2 + (if (k - value._1 <= value._1) (k - value._1, value._1) else (value._1, k - value._1)))
-    } else {
-      (acc._1 + value._1, acc._2)   
-    }
+    } else 
+      (acc._1 + value._1, acc._2)
   }
 
   def getResult(accumulator: ACC): OUT = {
