@@ -9,23 +9,21 @@ import scala.collection.mutable
  */
 import CustomAggr._
 
-final case class CustomAggr() extends AggregateFunction[A, ACC, OUT] {
-  implicit val ord = Ordering.fromLessThan[(String, Int)]({ case (f, s) => if (f._2 != s._2) f._2 > s._2 else f._1 < s._1 })
+final case class CustomAggr[A]() extends AggregateFunction[A, ACC[A], OUT[A]] {
 
-  def createAccumulator(): ACC = Set.empty
+  def createAccumulator(): ACC[A] = Set.empty
 
-  def add(value: A, acc: ACC): ACC = acc.filter( _._1.v != value._1.v) + value
+  def add(value: A, acc: ACC[A]): ACC[A] = acc + value
 
-  def getResult(acc: ACC): OUT = acc.toList
+  def getResult(acc: ACC[A]): OUT[A] = acc.toList
 
-  def merge(a: ACC, b: ACC): ACC = a ++ b
+  def merge(a: ACC[A], b: ACC[A]): ACC[A] = a ++ b
 }
 
 object CustomAggr {
-  type A = (Value, Int)
-  type ACC = Set[A]
+  type ACC[A] = Set[A]
   /*results, sum of coordinates equal to k, first<second*/
-  type OUT = List[A]
+  type OUT[A] = List[A]
 
 }
 

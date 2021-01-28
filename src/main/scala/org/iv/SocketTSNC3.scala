@@ -18,35 +18,44 @@ package org.iv
  * limitations under the License.
  */
 
+import java.lang
 import java.util.concurrent.TimeUnit
 
+import org.apache.flink.api.common.functions.{FilterFunction, RichFilterFunction}
 import org.apache.flink.api.common.serialization.SimpleStringEncoder
 import org.apache.flink.core.fs.Path
 import org.apache.flink.streaming.api.functions.sink.filesystem.{OutputFileConfig, StreamingFileSink}
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.DefaultRollingPolicy
 import org.apache.flink.streaming.api.scala._
+import org.apache.flink.streaming.api.windowing.evictors.Evictor
 import org.apache.flink.streaming.api.windowing.time.Time
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow
+import org.apache.flink.streaming.runtime.operators.windowing.TimestampedValue
 import org.iv.aggregate._
+import org.iv.keyselectors.CustomAggr
 import org.slf4j.LoggerFactory
+
+import scala.collection.mutable
 
 
 object SocketTSNC3 {
   val logger = LoggerFactory.getLogger(getClass)
 
   val config = OutputFileConfig
-   .builder()
-   .withPartPrefix("prefix")
-   .withPartSuffix(".ext")
-   .build()
+    .builder()
+    .withPartPrefix("prefix")
+    .withPartSuffix(".ext")
+    .build()
+
   def sink(outputPath: String): StreamingFileSink[List[(String, Int)]] = StreamingFileSink
     .forRowFormat(new Path(outputPath), new SimpleStringEncoder[List[(String, Int)]]("UTF-8"))
-  .withOutputFileConfig(config)
-//    .withRollingPolicy(
-//      DefaultRollingPolicy.builder()
-//        .withRolloverInterval(TimeUnit.MINUTES.toMillis(5))
-//        .withInactivityInterval(TimeUnit.MINUTES.toMillis(2))
-//        .withMaxPartSize(1024 * 1024 * 1024)
-//        .build())
+    .withOutputFileConfig(config)
+    //    .withRollingPolicy(
+    //      DefaultRollingPolicy.builder()
+    //        .withRolloverInterval(TimeUnit.MINUTES.toMillis(5))
+    //        .withInactivityInterval(TimeUnit.MINUTES.toMillis(2))
+    //        .withMaxPartSize(1024 * 1024 * 1024)
+    //        .build())
     .build()
 
   def main(args: Array[String]): Unit = {
@@ -58,7 +67,7 @@ object SocketTSNC3 {
 
     val hostName = args(0)
     val port = args(1).toInt
-
+    val k = 10
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     env.setParallelism(2)
     env.setMaxParallelism(4)
@@ -68,7 +77,13 @@ object SocketTSNC3 {
       .keyBy(_._1)
       .sum(1)
       .timeWindowAll(Time.of(1, TimeUnit.MINUTES), Time.of(3, TimeUnit.SECONDS))
-      .aggregate(MaxComposedAggr(10))
+      .aggregate(MaxComposedAggr(k))
+      .flatMap(_.asInstanceOf[List[(Int, Int)]]).keyBy(_._1)
+      .filterWithState[Set[(Int, Int)]]({
+        case (pair, Some(state)) => (!state.contains(pair), Some(state + pair))
+        case (pair, None) => (true, Some(Set(pair)))
+      })
+
 
     counts.print
 
