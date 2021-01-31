@@ -17,18 +17,23 @@ val flinkDependencies = Seq(
   "org.apache.flink" %% "flink-clients" % flinkVersion,
   "org.apache.flink" %% "flink-scala" % flinkVersion,
   "org.apache.flink" %% "flink-streaming-scala" % flinkVersion,
-  "org.apache.flink" %% "flink-connector-kafka" % flinkVersion
+  "org.apache.flink" %% "flink-connector-kafka" % flinkVersion,
+  "org.apache.flink" %% "flink-connector-jdbc" % flinkVersion
 )
 val loggingDependencies = Seq(
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
-  //  "ch.qos.logback" % "logback-classic" % "1.2.3",
+  "ch.qos.logback" % "logback-classic" % "1.2.3" % Provided,
   "org.codehaus.janino" % "janino" % "3.1.0",
   "de.siegmar" % "logback-gelf" % "2.1.2",
 )
 
 lazy val root = (project in file(".")).
   settings(
-    libraryDependencies ++= flinkDependencies ++ loggingDependencies
+    libraryDependencies ++= flinkDependencies ++ loggingDependencies ++ pgDeps,
+    semanticdbEnabled := true, // enable SemanticDB
+    semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
+    scalacOptions += "-Ywarn-unused-import", // required by `RemoveUnused` rule
+    scalacOptions += "-Yrangepos"
   )
 
 assembly / mainClass := Some("org.iv.Job")

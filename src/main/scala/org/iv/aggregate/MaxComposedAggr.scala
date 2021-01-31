@@ -1,9 +1,7 @@
 package org.iv.aggregate
 
 import org.apache.flink.api.common.functions.AggregateFunction
-
-import scala.collection.immutable.HashSet
-import scala.collection.mutable
+
 import MaxComposedAggr._
 
 

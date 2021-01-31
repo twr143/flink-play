@@ -1,8 +1,7 @@
 package org.iv.keyselectors
 
 
-import org.apache.flink.api.common.functions.AggregateFunction
-import scala.collection.mutable
+import org.apache.flink.api.common.functions.AggregateFunction
 
 /**
  * Created by twr143 on 23.01.2021 at 21:54.

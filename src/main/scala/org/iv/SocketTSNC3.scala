@@ -17,25 +17,17 @@ package org.iv
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import java.lang
+
 import java.util.concurrent.TimeUnit
-
-import org.apache.flink.api.common.functions.{FilterFunction, RichFilterFunction}
-import org.apache.flink.api.common.serialization.SimpleStringEncoder
-import org.apache.flink.core.fs.Path
-import org.apache.flink.streaming.api.functions.sink.filesystem.{OutputFileConfig, StreamingFileSink}
-import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.DefaultRollingPolicy
-import org.apache.flink.streaming.api.scala._
-import org.apache.flink.streaming.api.windowing.evictors.Evictor
-import org.apache.flink.streaming.api.windowing.time.Time
-import org.apache.flink.streaming.api.windowing.windows.TimeWindow
-import org.apache.flink.streaming.runtime.operators.windowing.TimestampedValue
-import org.iv.aggregate._
-import org.iv.keyselectors.CustomAggr
+
+import org.apache.flink.api.common.serialization.SimpleStringEncoder
+import org.apache.flink.core.fs.Path
+import org.apache.flink.streaming.api.functions.sink.filesystem.{OutputFileConfig, StreamingFileSink}
+import org.apache.flink.streaming.api.scala._
+import org.apache.flink.streaming.api.windowing.time.Time
+import org.iv.aggregate._
 import org.slf4j.LoggerFactory
-
-import scala.collection.mutable
+
 
 
 object SocketTSNC3 {
@@ -47,7 +39,7 @@ object SocketTSNC3 {
     .withPartSuffix(".ext")
     .build()
 
-  def sink(outputPath: String): StreamingFileSink[List[(String, Int)]] = StreamingFileSink
+  def sink2(outputPath: String): StreamingFileSink[List[(String, Int)]] = StreamingFileSink
     .forRowFormat(new Path(outputPath), new SimpleStringEncoder[List[(String, Int)]]("UTF-8"))
     .withOutputFileConfig(config)
     //    .withRollingPolicy(
@@ -76,7 +68,9 @@ object SocketTSNC3 {
       env.socketTextStream(hostName, port).flatMap(_.toLowerCase.split("\\W+")
         filter (w => w.nonEmpty && w.matches(regex))).map(_.toInt) else
       env.fromCollection(List.iterate(0, 100)(a => (a + 1) % 11))
-        .map(a=>{TimeUnit.MILLISECONDS.sleep(100);a})
+        .map(a => {
+          TimeUnit.MILLISECONDS.sleep(100); a
+        })
       )
       .map((_, 1))
       .keyBy(_._1)

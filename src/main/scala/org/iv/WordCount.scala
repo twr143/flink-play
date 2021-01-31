@@ -17,12 +17,10 @@ package org.iv
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import org.apache.flink.api.common.operators.Order
+
 import org.apache.flink.api.scala._
 import org.slf4j.LoggerFactory
-
-import scala.Console.println
+
 
 /**
  * Implements the "WordCount" program that computes a simple word occurrence histogram

@@ -1,11 +1,10 @@
 package org.iv.kafka
 
 import java.util.Properties
-
-import org.apache.flink.api.scala.ExecutionEnvironment
+
 import org.apache.flink.streaming.api.scala.{StreamExecutionEnvironment, createTypeInformation}
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer.Semantic
-import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer, FlinkKafkaProducer, FlinkKafkaProducer011}
+import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer, FlinkKafkaProducer}
 import scalapb.GeneratedMessage
 
 /**

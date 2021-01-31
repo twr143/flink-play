@@ -10,10 +10,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import protomodels.person.Person
 import protomodels.person2.Person2
 import scalapb.GeneratedMessage
-
-import scala.concurrent.duration._
-import com.google.protobuf.any.Any
-import org.apache.flink.api.java.typeutils.PojoTypeInfo
+
+import com.google.protobuf.any.Any
 import org.apache.flink.api.java.typeutils.TypeExtractor.getForClass
 
 class KafkaMsgDeserializer extends KafkaDeserializationSchema[GeneratedMessage] {

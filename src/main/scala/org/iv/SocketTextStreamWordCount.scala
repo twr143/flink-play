@@ -24,8 +24,7 @@ import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.iv.aggregate.MaxNAggr
 import org.slf4j.LoggerFactory
-
-import scala.collection.mutable
+
 
 /**
  * This example shows an implementation of WordCount with data from a text socket.
