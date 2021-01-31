@@ -41,6 +41,7 @@ object SocketTSNCPG {
     .withUrl("jdbc:postgresql://localhost:5432/flink-d")
     .withUsername("fl_user")
     .build();
+  
 
 
   def main(args: Array[String]): Unit = {
@@ -57,6 +58,11 @@ object SocketTSNCPG {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     env.setParallelism(2)
     env.setMaxParallelism(4)
+    env.fromElements(1).addSink(JdbcSink.sink(
+          "delete from lognote",
+          new JdbcStatementBuilder[Int] {
+            def accept(a: PreparedStatement, u: Int): Unit ={}}, connection))
+
     val counts = (if (source == "socket")
       env.socketTextStream(hostName, port).flatMap(_.toLowerCase.split("\\W+")
         filter (w => w.nonEmpty && w.matches(regex))).map(_.toInt) else
@@ -87,7 +93,7 @@ object SocketTSNCPG {
       }, connection))
 
 
-      env.execute("Scala SocketTSNC3 Example")
+      env.execute("Scala SocketTSNCPG Example")
   }
 
 }
