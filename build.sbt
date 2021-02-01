@@ -29,7 +29,7 @@ val loggingDependencies = Seq(
 
 lazy val root = (project in file(".")).
   settings(
-    libraryDependencies ++= flinkDependencies ++ loggingDependencies ++ pgDeps,
+    libraryDependencies ++= flinkDependencies ++ loggingDependencies ++ pgDeps ++ unitTestingStack,
     semanticdbEnabled := true, // enable SemanticDB
     semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
     scalacOptions += "-Ywarn-unused-import", // required by `RemoveUnused` rule
