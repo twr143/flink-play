@@ -53,8 +53,8 @@ object SocketTSLS {
       })
 
 
-    counts.print
     counts.addSink(logtableSink[Int])
+    counts.print
 
     env.execute("SocketTextStreamLongestSeq")
   }
