@@ -1,47 +1,20 @@
 package org.iv.integrations.postgres
 
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-
-import java.sql.PreparedStatement
 import java.util.concurrent.TimeUnit
 
-import org.apache.flink.api.common.serialization.SimpleStringEncoder
-import org.apache.flink.connector.jdbc.{JdbcConnectionOptions, JdbcSink, JdbcStatementBuilder}
-import org.apache.flink.core.fs.Path
-import org.apache.flink.streaming.api.functions.sink.filesystem.{OutputFileConfig, StreamingFileSink}
+
+
+
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.iv.aggregate._
 import org.slf4j.LoggerFactory
-
+import Sinks._
 
 object SocketTSNCPG {
   val logger = LoggerFactory.getLogger(getClass)
 
-  val connection = new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-    .withDriverName("org.postgresql.Driver")
-    .withPassword("123")
-    .withUrl("jdbc:postgresql://localhost:5432/flink-d")
-    .withUsername("fl_user")
-    .build();
-  
 
 
   def main(args: Array[String]): Unit = {
@@ -56,12 +29,7 @@ object SocketTSNCPG {
     val source = args(2)
     val k = 10
     val env = StreamExecutionEnvironment.getExecutionEnvironment
-    env.setParallelism(2)
-    env.setMaxParallelism(4)
-    env.fromElements(1).addSink(JdbcSink.sink(
-          "delete from lognote",
-          new JdbcStatementBuilder[Int] {
-            def accept(a: PreparedStatement, u: Int): Unit ={}}, connection))
+    env.fromElements(1).addSink(cleanLogTableSink)
 
     val counts = (if (source == "socket")
       env.socketTextStream(hostName, port).flatMap(_.toLowerCase.split("\\W+")
@@ -85,15 +53,10 @@ object SocketTSNCPG {
 
 
     counts.print
-    counts.addSink(JdbcSink.sink(
-      "insert into lognote (message) values (?)",
-      new JdbcStatementBuilder[(Int,Int)] {
-        def accept(a: PreparedStatement, u: (Int, Int)): Unit =
-          a.setString(1, s"$u")
-      }, connection))
+    counts.addSink(logtableSink[(Int,Int)])
 
 
-      env.execute("Scala SocketTSNCPG Example")
+    env.execute("Scala SocketTSNCPG Example")
   }
 
 }
