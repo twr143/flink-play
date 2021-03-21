@@ -9,7 +9,7 @@ package org.iv
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,10 +17,11 @@ package org.iv
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+
+
 import org.apache.flink.api.scala._
 import org.slf4j.LoggerFactory
-
+
 
 /**
  * Implements the "WordCount" program that computes a simple word occurrence histogram
@@ -34,6 +35,7 @@ import org.slf4j.LoggerFactory
  */
 object WordCount {
   val logger = LoggerFactory.getLogger(getClass)
+
   def main(args: Array[String]): Unit = {
 
     // set up the execution environment
@@ -44,18 +46,22 @@ object WordCount {
       "Whether 'tis nobler in the mind to suffer", "The slings and arrows of outrageous fortune",
       "Or to take arms against a sea of troubles,")
 
-    val counts = text.flatMap { _.toLowerCase.split("\\W+") }
-      .map { (_, 1) }
+    val counts = text.flatMap {
+      _.toLowerCase.split("\\W+")
+    }
+      .map {
+        (_, 1)
+      }
       .groupBy(0)
       .sum(1)
       .collect().toList
-      .sorted(Ordering.fromLessThan[(String,Int)]({case (f,s) => if (f._2!=s._2) f._2>s._2 else f._1<s._1})).take(6)
-//      .re
-//      .(1,Order.DESCENDING)
-//      .first(3)
-
+      .sorted(Ordering.fromLessThan[(String, Int)]({ case (f, s) => if (f._2 != s._2) f._2 > s._2 else f._1 < s._1 })).take(6)
+    //      .re
+    //      .(1,Order.DESCENDING)
+    //      .first(3)
     // execute and print result
-       logger.info("c result {}", counts)
+
+      logger.info("c result {}", counts)
 
   }
 }

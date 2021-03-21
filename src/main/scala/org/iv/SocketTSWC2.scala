@@ -22,7 +22,8 @@ import java.util.concurrent.TimeUnit
 
 import org.apache.flink.api.common.serialization.SimpleStringEncoder
 import org.apache.flink.core.fs.Path
-import org.apache.flink.streaming.api.functions.sink.filesystem.{OutputFileConfig, StreamingFileSink}
+import org.apache.flink.streaming.api.functions.sink.filesystem.{OutputFileConfig, StreamingFileSink}
+
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.iv.aggregate.MaxNAggr
@@ -58,8 +59,8 @@ object SocketTSWC2 {
     val port = args(1).toInt
 
     val env = StreamExecutionEnvironment.getExecutionEnvironment
-    env.setParallelism(2)
-    env.setMaxParallelism(4)
+//    env.setParallelism(2)
+//    env.setMaxParallelism(4)
 
     val text = env.socketTextStream(hostName, port)
     val counts = text.flatMap(_.toLowerCase.split("\\W+") filter (_.nonEmpty)).map((_, 1))
@@ -71,7 +72,7 @@ object SocketTSWC2 {
     counts.print
     counts.addSink(sink("aggrout"))
 
-    env.execute("Scala SocketTSWC2 Example")
+//    env.execute("Scala SocketTSWC2 Example")
   }
 
 }

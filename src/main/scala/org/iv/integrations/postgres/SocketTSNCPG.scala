@@ -3,7 +3,8 @@ package org.iv.integrations.postgres
 
 import java.util.concurrent.TimeUnit
 
-
+
+
 
 
 import org.apache.flink.streaming.api.scala._
@@ -43,7 +44,7 @@ object SocketTSNCPG {
       .map((_, 1))
       .keyBy(_._1)
       .sum(1)
-      .timeWindowAll(Time.of(1, TimeUnit.MINUTES), Time.of(3, TimeUnit.SECONDS))
+      .timeWindowAll(Time.of(3, TimeUnit.SECONDS), Time.of(3, TimeUnit.SECONDS))
       .aggregate(MaxComposedAggr(k))
       .flatMap(_.asInstanceOf[List[(Int, Int)]]).keyBy(_._1)
       .filterWithState[Set[(Int, Int)]]({

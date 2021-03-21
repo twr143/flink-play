@@ -34,10 +34,10 @@ lazy val root = (project in file(".")).
     semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
     scalacOptions += "-Ywarn-unused-import", // required by `RemoveUnused` rule
     scalacOptions += "-Yrangepos",
-    mainClass in(Compile, packageBin) := Some("org.iv.WordCount")
+    mainClass in(Compile, packageBin) := Some("org.iv.SocketTSNC3")
   )
 
-assembly / mainClass := Some("org.iv.Job")
+assembly / mainClass := Some("org.iv.SocketTSNC3")
 // make run command include the provided dependencies
 Compile / run := Defaults.runTask(Compile / fullClasspath,
   Compile / run / mainClass,

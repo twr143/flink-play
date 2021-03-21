@@ -17,17 +17,27 @@ package org.iv
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+
+
 import java.util.concurrent.TimeUnit
-
-import org.apache.flink.api.common.serialization.SimpleStringEncoder
-import org.apache.flink.core.fs.Path
-import org.apache.flink.streaming.api.functions.sink.filesystem.{OutputFileConfig, StreamingFileSink}
-import org.apache.flink.streaming.api.scala._
-import org.apache.flink.streaming.api.windowing.time.Time
-import org.iv.aggregate._
+
+
+import org.apache.flink.api.common.serialization.SimpleStringEncoder
+
+import org.apache.flink.core.fs.Path
+
+import org.apache.flink.streaming.api.functions.sink.filesystem.{OutputFileConfig, StreamingFileSink}
+
+import org.apache.flink.streaming.api.scala._
+
+import org.apache.flink.streaming.api.windowing.time.Time
+
+
+import org.iv.aggregate._
+
 import org.slf4j.LoggerFactory
-
+
+
 
 
 object SocketTSNC3 {
@@ -75,7 +85,7 @@ object SocketTSNC3 {
       .map((_, 1))
       .keyBy(_._1)
       .sum(1)
-      .timeWindowAll(Time.of(1, TimeUnit.MINUTES), Time.of(3, TimeUnit.SECONDS))
+      .timeWindowAll(Time.of(5, TimeUnit.SECONDS), Time.of(3, TimeUnit.SECONDS))
       .aggregate(MaxComposedAggr(k))
       .flatMap(_.asInstanceOf[List[(Int, Int)]]).keyBy(_._1)
       .filterWithState[Set[(Int, Int)]]({
@@ -85,6 +95,7 @@ object SocketTSNC3 {
 
 
     counts.print
+    logger.info("c result {}", counts)
 
     env.execute("Scala SocketTSNC3 Example")
   }
