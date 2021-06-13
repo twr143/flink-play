@@ -21,6 +21,7 @@ package org.iv
 
 import java.util.concurrent.TimeUnit
 
+import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.common.serialization.SimpleStringEncoder
 import org.apache.flink.core.fs.Path
 import org.apache.flink.streaming.api.functions.sink.SinkFunction
@@ -56,7 +57,7 @@ object SocketTSNC3 {
   def main(args: Array[String]): Unit = {
     val regex = "[\\d-]+"
     if (args.length != 3) {
-      System.err.println("USAGE:\nSocketTextStreamWordCount <hostname> <port> <source>")
+      System.err.println(s"USAGE:\nSocketTextStreamWordCount <hostname> <port> <source> args len ${args.mkString(" ")}")
       return
     }
 
@@ -65,8 +66,9 @@ object SocketTSNC3 {
     val source = args(2)
     val k = 10
     val env = StreamExecutionEnvironment.getExecutionEnvironment
-    env.setParallelism(2)
-    env.setMaxParallelism(4)
+    RestartStrategies.failureRateRestart(1, org.apache.flink.api.common.time.Time.seconds(1), org.apache.flink.api.common.time.Time.seconds(1))
+//    env.setParallelism(2)
+//    env.setMaxParallelism(4)
     val counts = (if (source == "socket")
       env.socketTextStream(hostName, port).flatMap(_.toLowerCase.split("\\W-")
         filter (w => w.nonEmpty && w.matches(regex))).map(_.toInt) else
