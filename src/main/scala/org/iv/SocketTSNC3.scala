@@ -21,20 +21,13 @@ package org.iv
 
 import java.util.concurrent.TimeUnit
 
-
 import org.apache.flink.api.common.serialization.SimpleStringEncoder
-
 import org.apache.flink.core.fs.Path
-
+import org.apache.flink.streaming.api.functions.sink.SinkFunction
 import org.apache.flink.streaming.api.functions.sink.filesystem.{OutputFileConfig, StreamingFileSink}
-
 import org.apache.flink.streaming.api.scala._
-
 import org.apache.flink.streaming.api.windowing.time.Time
-
-
 import org.iv.aggregate._
-
 import org.slf4j.LoggerFactory
 
 
@@ -49,8 +42,8 @@ object SocketTSNC3 {
     .withPartSuffix(".ext")
     .build()
 
-  def sink2(outputPath: String): StreamingFileSink[List[(String, Int)]] = StreamingFileSink
-    .forRowFormat(new Path(outputPath), new SimpleStringEncoder[List[(String, Int)]]("UTF-8"))
+  def sink2(outputPath: String): StreamingFileSink[List[(Int, Int)]] = StreamingFileSink
+    .forRowFormat(new Path(outputPath), new SimpleStringEncoder[List[(Int, Int)]]("UTF-8"))
     .withOutputFileConfig(config)
     //    .withRollingPolicy(
     //      DefaultRollingPolicy.builder()
@@ -61,7 +54,7 @@ object SocketTSNC3 {
     .build()
 
   def main(args: Array[String]): Unit = {
-    val regex = "\\d+"
+    val regex = "[\\d-]+"
     if (args.length != 3) {
       System.err.println("USAGE:\nSocketTextStreamWordCount <hostname> <port> <source>")
       return
@@ -75,7 +68,7 @@ object SocketTSNC3 {
     env.setParallelism(2)
     env.setMaxParallelism(4)
     val counts = (if (source == "socket")
-      env.socketTextStream(hostName, port).flatMap(_.toLowerCase.split("\\W+")
+      env.socketTextStream(hostName, port).flatMap(_.toLowerCase.split("\\W-")
         filter (w => w.nonEmpty && w.matches(regex))).map(_.toInt) else
       env.fromCollection(List.iterate(0, 100)(a => (a + 1) % 11))
         .map(a => {
@@ -96,6 +89,7 @@ object SocketTSNC3 {
 
     counts.print
     logger.info("c result {}", counts)
+    counts.addSink(sink2("sout").asInstanceOf[SinkFunction[(Int,Int)]])
 
     env.execute("Scala SocketTSNC3 Example")
   }
